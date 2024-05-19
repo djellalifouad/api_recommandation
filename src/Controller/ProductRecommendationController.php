@@ -55,7 +55,7 @@ class ProductRecommendationController extends AbstractController
             return false;
         }
 
-        if (isset($data['weather']['date']) && !in_array($data['weather']['date'], ['today', 'tomorrow'])) {
+        if (isset($data['date']) && !in_array($data['date'], ['today', 'tomorrow'])) {
             return false;
         }
 
