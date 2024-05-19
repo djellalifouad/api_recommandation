@@ -27,11 +27,13 @@
 4. **Run database migrations:**
     ```bash
     php bin/console doctrine:migrations:migrate
+    
     ```
 
 5. **Load fixtures (optional):**
     If you have fixtures to load initial data, run:
     ```bash
+    composer require doctrine/doctrine-fixtures-bundle --dev
     php bin/console doctrine:fixtures:load
   ```
 
@@ -43,6 +45,12 @@
     ```bash
     php -S localhost:8000 -t public
     ```
+7. **Créer des données fake**
+ ```bash
+    php bin/console app:generate-data
+    ```
+
+
 
 ## Testing the API
 
