@@ -74,7 +74,6 @@ class Type
     public function removeProduit(Produit $produit): static
     {
         if ($this->produits->removeElement($produit)) {
-            // set the owning side to null (unless already changed)
             if ($produit->getType() === $this) {
                 $produit->setType(null);
             }

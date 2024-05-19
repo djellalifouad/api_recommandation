@@ -67,7 +67,7 @@ class Produit
     public function setType(?Type $type): static
     {
         $this->type = $type;
-
         return $this;
     }
+    
 }
