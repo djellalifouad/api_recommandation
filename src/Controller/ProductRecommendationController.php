@@ -27,8 +27,8 @@ class ProductRecommendationController extends AbstractController
         $city = $data['weather']['city'] ?? null;
         $date = $data['weather']['date'] ?? 'today';
 
-        if (!$city) {
-            return $this->json(['error' => 'City is required'], Response::HTTP_BAD_REQUEST);
+        if (!$this->isValidRequestBody($data)) {
+            return $this->json(['error' => 'Invalid request body'], Response::HTTP_BAD_REQUEST);
         }
 
         $weather = $this->weatherService->getWeather($city, $date);
@@ -48,5 +48,17 @@ class ProductRecommendationController extends AbstractController
                 'date' => $date
             ]
         ]);
+    }
+    private function isValidRequestBody($data): bool
+    {
+        if (!isset($data['weather']['city'])) {
+            return false;
+        }
+
+        if (isset($data['weather']['date']) && !in_array($data['weather']['date'], ['today', 'tomorrow'])) {
+            return false;
+        }
+
+        return true;
     }
 }
