@@ -87,5 +87,5 @@ You can test the API endpoint using tools like `curl` or Postman.
 ```bash
 curl -X POST http://localhost:8000/recommendations \
      -H "Content-Type: application/json" \
-     -d '{"weather": {"city": "Paris"},"date": "today"}'
+     -d '{"weather": {"city": "Paris"},"date": "tomorrow"}'
 
