@@ -9,7 +9,7 @@
     ```
 
 2. **Set up environment variables:**
-    Create a `.env.local` file and add your WeatherAPI key:
+    Create a `.env.local` file and add your WeatherAPI key or add it in env direcly:
     ```env
     WEATHER_API_KEY=your_api_key_here
     ```
