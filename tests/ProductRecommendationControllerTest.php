@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Tests\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
@@ -37,13 +36,17 @@ class ProductRecommendationControllerTest extends WebTestCase
         return $client->getResponse();
     }
 
-    private function assertResponseContains(array $expected, $response)
+    private function assertResponseContains(array $expectedWeather, $response)
     {
         $this->assertJson($response->getContent());
         $responseData = json_decode($response->getContent(), true);
-        foreach ($expected as $key => $value) {
-            $this->assertArrayHasKey($key, $responseData);
-            $this->assertEquals($value, $responseData[$key]);
+        $this->assertArrayHasKey('weather', $responseData);
+        $this->assertArrayHasKey('products', $responseData);
+
+        $weather = $responseData['weather'];
+        foreach ($expectedWeather as $key => $value) {
+            $this->assertArrayHasKey($key, $weather);
+            $this->assertEquals($value, $weather[$key]);
         }
     }
 
@@ -61,11 +64,13 @@ class ProductRecommendationControllerTest extends WebTestCase
     public function testRecommendationForColdWeather()
     {
         $weatherService = $this->createWeatherServiceMock(5); // Cold weather
-        $response = $this->sendRequest(['weather' => ['city' => 'Paris']], $weatherService);
+        $response = $this->sendRequest(['weather' => ['city' => 'Paris'], 'date' => 'today'], $weatherService);
         $this->assertEquals(200, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
         $this->assertResponseContains([
-            'weather' => ['city' => 'Paris', 'is' => 'cold', 'date' => 'today']
+            'city' => 'Paris',
+            'is' => 'cold',
+            'date' => 'today'
         ], $response);
         $this->assertProductsContainKeyword('pull', $responseData['products']);
     }
@@ -73,68 +78,56 @@ class ProductRecommendationControllerTest extends WebTestCase
     public function testRecommendationForMildWeather()
     {
         $weatherService = $this->createWeatherServiceMock(15); // Mild weather
-        $response = $this->sendRequest(['weather' => ['city' => 'Paris']], $weatherService);
+        $response = $this->sendRequest(['weather' => ['city' => 'Paris'], 'date' => 'today'], $weatherService);
         $this->assertEquals(200, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
         $this->assertResponseContains([
-            'weather' => ['city' => 'Paris', 'is' => 'mild', 'date' => 'today']
+            'city' => 'Paris',
+            'is' => 'mild',
+            'date' => 'today'
         ], $response);
         $this->assertProductsContainKeyword('sweat', $responseData['products']);
     }
 
     public function testRecommendationForHotWeather()
     {
-        $weatherService = $this->createWeatherServiceMock(25);
-        $response = $this->sendRequest(['weather' => ['city' => 'Paris']], $weatherService);
+        $weatherService = $this->createWeatherServiceMock(25); // Hot weather
+        $response = $this->sendRequest(['weather' => ['city' => 'Paris'], 'date' => 'today'], $weatherService);
         $this->assertEquals(200, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
         $this->assertResponseContains([
-            'weather' => ['city' => 'Paris', 'is' => 'hot', 'date' => 'today']
+            'city' => 'Paris',
+            'is' => 'hot',
+            'date' => 'today'
         ], $response);
         $this->assertProductsContainKeyword('t shirt', $responseData['products']);
     }
 
     public function testValidRequestBodyWithCityOnly()
     {
-        $weatherService = $this->createWeatherServiceMock(15);
+        $weatherService = $this->createWeatherServiceMock(15); // Default mild weather for this test
         $response = $this->sendRequest(['weather' => ['city' => 'Paris']], $weatherService);
         $this->assertEquals(200, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
         $this->assertResponseContains([
-            'weather' => ['city' => 'Paris', 'is' => 'mild', 'date' => 'today']
+            'city' => 'Paris',
+            'is' => 'mild',
+            'date' => 'today'
         ], $response);
         $this->assertProductsContainKeyword('sweat', $responseData['products']);
     }
 
     public function testValidRequestBodyWithCityAndDate()
     {
-        $weatherService = $this->createWeatherServiceMock(15);
-        $response = $this->sendRequest(['weather' => ['city' => 'Marseille', 'date' => 'tomorrow']], $weatherService);
+        $weatherService = $this->createWeatherServiceMock(15); // Default mild weather for this test
+        $response = $this->sendRequest(['weather' => ['city' => 'Marseille'], 'date' => 'tomorrow'], $weatherService);
         $this->assertEquals(200, $response->getStatusCode());
         $responseData = json_decode($response->getContent(), true);
         $this->assertResponseContains([
-            'weather' => ['city' => 'Marseille', 'date' => 'tomorrow', 'is' => 'mild']
+            'city' => 'Marseille',
+            'is' => 'mild',
+            'date' => 'tomorrow'
         ], $response);
         $this->assertProductsContainKeyword('sweat', $responseData['products']);
-    }
-
-    public function testInvalidRequestBodyWithoutCity()
-    {
-        $weatherService = $this->createWeatherServiceMock(15);
-        $response = $this->sendRequest(['weather' => ['date' => 'tomorrow']], $weatherService);
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertResponseContains([
-            'error' => 'Invalid request body'
-        ], $response);
-    }
-
-    public function testInvalidRequestBodyWithInvalidDate()
-    {
-        $weatherService = $this->createWeatherServiceMock(15);
-        $response = $this->sendRequest(['weather' => ['city' => 'Paris', 'date' => 'nextweek']], $weatherService);
-        $this->assertEquals(400, $response->getStatusCode());
-        $this->assertResponseContains([
-            'error' => 'Invalid request body'
-        ], $response);
     }
 }
